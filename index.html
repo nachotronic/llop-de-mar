@@ -1,0 +1,89 @@
+<!--
+  Versió 4.0 · Llop de Mar
+  Tres fitxers: index.html, styles.css i app.js.
+  Sense iframe de mapa. Mapa CARTO/Leaflet i previsió Open-Meteo funcional.
+-->
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mapa i previsió · Llop de Mar</title>
+  <meta name="description" content="Mapa i previsió meteorològica per als grups de rem del Club Rem Llop de Mar a Sant Feliu de Guíxols." />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="remo-weather-block">
+    <div class="remo-dashboard">
+      <section class="map-column" aria-label="Mapa i selector de grups">
+        <div class="map-card">
+          <div class="map-frame-wrap" aria-label="Mapa de la zona de rem de Sant Feliu de Guíxols">
+            <div id="map"></div>
+            <div class="wind-stream-layer" aria-hidden="true">
+              <div class="wind-stream-field" id="windStreamLayer"></div>
+            </div>
+            <div class="map-note">CARTO · OpenStreetMap</div>
+          </div>
+        </div>
+
+        <div class="map-controls" aria-label="Selector de grups de sortida en escriptori">
+          <div class="day-buttons" aria-label="Dies de sortida">
+            <button class="day-btn active" data-day="1">Dilluns</button>
+            <button class="day-btn" data-day="3">Dimecres</button>
+          </div>
+          <div class="session-buttons" aria-label="Hores de sortida">
+            <button class="session-btn active" data-time="08:00">08:00</button>
+            <button class="session-btn" data-time="09:00">09:00</button>
+            <button class="session-btn" data-time="16:30">16:30</button>
+            <button class="session-btn" data-time="17:45">17:45</button>
+            <button class="session-btn" data-time="19:00">19:00</button>
+            <button class="session-btn" data-time="20:15">20:15</button>
+          </div>
+        </div>
+      </section>
+
+      <aside class="weather-card" aria-label="Previsió per als grups de rem">
+        <div class="weather-header">
+          <h2>Previsió per grups</h2>
+          <img src="logo-llop-de-mar.png" alt="Club Rem Llop de Mar" class="weather-logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='grid';">
+          <span class="weather-logo-fallback" aria-hidden="true">LDM</span>
+        </div>
+
+        <p class="updated" id="updatedAt">Actualitzant dades...</p>
+
+        <div class="mobile-controls" aria-label="Selector de grups de sortida en mòbil">
+          <div class="day-buttons" aria-label="Dies de sortida">
+            <button class="day-btn active" data-day="1">Dilluns</button>
+            <button class="day-btn" data-day="3">Dimecres</button>
+          </div>
+          <div class="session-buttons" aria-label="Hores de sortida">
+            <button class="session-btn active" data-time="08:00">08:00</button>
+            <button class="session-btn" data-time="09:00">09:00</button>
+            <button class="session-btn" data-time="16:30">16:30</button>
+            <button class="session-btn" data-time="17:45">17:45</button>
+            <button class="session-btn" data-time="19:00">19:00</button>
+            <button class="session-btn" data-time="20:15">20:15</button>
+          </div>
+        </div>
+
+        <div class="session-summary" id="sessionSummary">
+          Selecciona una hora de sortida per veure la previsió del grup.
+        </div>
+
+        <div class="external-links">
+          <a class="radar-link" href="https://www.meteo.cat/observacions/radar" target="_blank" rel="noopener">Radar pluja</a>
+          <a class="radar-link" href="https://www.meteo.cat/prediccio/maritim" target="_blank" rel="noopener">Predicció marítima</a>
+        </div>
+
+        <div class="notice">
+          Dades automàtiques aproximades per a la zona de Sant Feliu de Guíxols. Abans de sortir a remar, reviseu també l'estat real de la mar, l'onatge, el radar de pluja i la predicció marítima oficial.
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
