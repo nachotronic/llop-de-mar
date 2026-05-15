@@ -261,7 +261,7 @@ body {
   background: #eef7f8;
 }
 
-/* Flecha pequeña para la dirección de la ola en la píldora superior */
+/* Flecha pequeña para la dirección de la ola en la píldora superior, si se usa */
 .wave-arrow-inline {
   display: inline-block;
   width: 14px;
@@ -407,6 +407,7 @@ body {
   gap: .12rem;
   justify-items: center;
 }
+
 .sea-mini-value {
   display: block;
   font-family: Georgia, "Times New Roman", serif;
@@ -424,6 +425,7 @@ body {
   font-weight: 850;
   line-height: 1.15;
 }
+
 .sea-mini-direction {
   display: inline-flex;
   align-items: center;
@@ -443,6 +445,7 @@ body {
   transform-origin: center;
 }
 
+/* Contenedor del icono de Meteocat */
 .sea-mini-icon {
   width: 78px;
   height: 78px;
@@ -453,13 +456,22 @@ body {
   border: 1px solid rgba(16,47,58,.10);
 }
 
+/* Por si todavía queda algún SVG antiguo */
 .sea-mini-icon svg {
   width: 54px;
   height: 54px;
   display: block;
 }
 
-/* Todas las olas en azul corporativo */
+/* Iconos Meteocat en imagen */
+.sea-mini-img {
+  width: 54px;
+  height: 54px;
+  display: block;
+  object-fit: contain;
+}
+
+/* Si alguna clase de nivel sigue aplicada, mantenemos todo en azul corporativo */
 .sea-mini-calm,
 .sea-mini-small,
 .sea-mini-moderate,
@@ -744,8 +756,8 @@ body {
   }
 
   .meta-pill {
-    padding: .32rem .52rem;
-    font-size: .78rem;
+    padding: .3rem .46rem;
+    font-size: .74rem;
   }
 
   .session-buttons {
@@ -802,8 +814,21 @@ body {
     height: 40px;
   }
 
+  .sea-mini-img {
+    width: 40px;
+    height: 40px;
+  }
+
   .sea-mini {
     font-size: .68rem;
+  }
+
+  .sea-mini-value {
+    font-size: .92rem;
+  }
+
+  .sea-mini-label {
+    font-size: .66rem;
   }
 
   .sea-mini-direction {
@@ -860,13 +885,6 @@ body {
     height: 240px;
     min-height: 220px;
   }
-}
-.sea-mini-value {
-  font-size: .92rem;
-}
-
-.sea-mini-label {
-  font-size: .66rem;
 }
 
 @media (max-width: 390px) {
