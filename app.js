@@ -1,59 +1,29 @@
 /*
   app.js · Llop de Mar
-  ------------------------------------------------------------
-  Este archivo contiene toda la lógica de la web:
-  - carga del mapa CARTO/Leaflet
-  - consulta de previsión meteorológica Open-Meteo
-  - consulta de previsión marina Open-Meteo Marine
-  - selección de día/hora del grupo
-  - mensajes de recomendación
-  - comentarios de viento, lluvia, mar y luces
-  - flechas animadas de viento en desktop
+  Versión con bloque de mar dentro del comentario
+  SIN iconos externos de Meteocat.
 
-  Para modificar textos:
-  - viento: busca function windComment(...)
-  - lluvia: busca function rainComment(...)
-  - mar: busca function marineComment(...)
-  - recomendación principal: busca function rowingRecommendation(...)
-  - estado de la mar: busca function seaStateLabel(...)
+  Qué incluye:
+  - mapa CARTO/Leaflet;
+  - previsión meteorológica Open-Meteo;
+  - previsión marina Open-Meteo Marine;
+  - selección de día/hora;
+  - comentarios de viento, lluvia, mar y luces;
+  - bloque visual de viento + mar;
+  - icono interno azul de ola;
+  - flechas de viento en el mapa solo en escritorio.
 */
 
 document.addEventListener("DOMContentLoaded", () => {
-  /*
-    Coordenadas aproximadas de Sant Feliu de Guíxols.
-    Se usan para la previsión meteorológica general.
-  */
   const SANT_FELIU = { lat: 41.781, lon: 3.0345 };
 
-  /*
-    Estado actual de la selección.
-    selectedSessionDay:
-    - 1 = dilluns/lunes
-    - 3 = dimecres/miércoles
-
-    selectedSessionTime:
-    - hora del grupo elegido
-  */
   let selectedSessionTime = "08:00";
   let selectedSessionDay = 1;
-
-  /*
-    Guardamos los datos cargados para no tener que llamar a la API
-    cada vez que el usuario cambia de botón.
-  */
   let cachedWeatherData = null;
-
-  /*
-    Referencia al mapa Leaflet.
-  */
   let map = null;
 
   /*
     MAPA
-    ------------------------------------------------------------
-    Inicializa Leaflet con una capa CARTO clara.
-    En móvil mantenemos el mapa, pero sin flechas animadas encima
-    para evitar problemas de rendimiento/visualización.
   */
   function initMap() {
     const mapElement = document.getElementById("map");
@@ -77,18 +47,12 @@ document.addEventListener("DOMContentLoaded", () => {
       attribution: "&copy; OpenStreetMap contributors &copy; CARTO"
     }).addTo(map);
 
-    /*
-      Leaflet a veces necesita recalcular tamaño cuando carga dentro
-      de contenedores responsive.
-    */
     setTimeout(() => map.invalidateSize(), 250);
     setTimeout(() => map.invalidateSize(), 900);
   }
 
   /*
     DIRECCIONES
-    ------------------------------------------------------------
-    Convierte grados en direcciones abreviadas y nombres de viento.
   */
   function directionName(deg) {
     const directions = ["N", "NE", "E", "SE", "S", "SO", "O", "NO"];
@@ -106,6 +70,7 @@ document.addEventListener("DOMContentLoaded", () => {
       "Ponent",
       "Mestral"
     ];
+
     return names[Math.round(deg / 45) % 8];
   }
 
@@ -114,8 +79,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /*
-    FORMATO DE FECHAS Y HORAS
-    ------------------------------------------------------------
+    FORMATO DE FECHAS
   */
   function capitalizeWords(text) {
     return text
@@ -148,6 +112,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function formatShortTime(isoString) {
     if (!isoString) return "--";
+
     return new Date(isoString).toLocaleTimeString("ca-ES", {
       hour: "2-digit",
       minute: "2-digit"
@@ -155,10 +120,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /*
-    CÁLCULO DEL PRÓXIMO DÍA/HORA DE SALIDA
-    ------------------------------------------------------------
-    Busca la próxima fecha futura que coincida con el día elegido
-    y la hora del grupo.
+    PRÓXIMA FECHA DE SALIDA
   */
   function parseSessionTime(timeString) {
     const [hour, minute] = timeString.split(":").map(Number);
@@ -183,10 +145,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /*
-    SELECCIÓN DE LA PREVISIÓN MÁS CERCANA
-    ------------------------------------------------------------
-    Open-Meteo devuelve datos horarios. Para salidas tipo 17:45,
-    buscamos la hora de previsión más cercana.
+    BUSCAR PREVISIÓN MÁS CERCANA A LA HORA DEL GRUPO
   */
   function findClosestForecast(hourly, targetDate) {
     let closestIndex = 0;
@@ -249,15 +208,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
   /*
     ESTADO DE LA MAR
-    ------------------------------------------------------------
-    Aquí puedes modificar las categorías de altura de ola.
 
-    Importante:
-    - He interpretado "0 a 0.9" como 0 a 0,09 m.
-    - He interpretado "01 a 02" como 0,10 a 0,20 m.
-    Así evitamos que las franjas se solapen.
-
-    Cambia los límites si el club usa otros criterios.
+    Criterios actuales:
+    - 0 a 0,09 m: Mar en calma
+    - 0,10 a 0,20 m: Onadeta
+    - 0,21 a 0,49 m: Marejol
+    - 0,50 a 1,24 m: Maror
+    - 1,25 a 2,49 m: Forta maror
+    - 2,50 m o más: Maregassa
   */
   function seaStateLabel(waveHeight) {
     if (waveHeight == null || Number.isNaN(waveHeight)) {
@@ -273,24 +231,76 @@ document.addEventListener("DOMContentLoaded", () => {
     return "Maregassa";
   }
 
+  function seaStateLevel(waveHeight) {
+    if (waveHeight == null || Number.isNaN(waveHeight)) return "unknown";
+    if (waveHeight < 0.10) return "calm";
+    if (waveHeight <= 0.20) return "small";
+    if (waveHeight < 0.50) return "moderate";
+    if (waveHeight < 1.25) return "high";
+
+    return "very-high";
+  }
+
   function waveDirectionLabel(deg) {
     if (deg == null || Number.isNaN(deg)) return "direcció sense dades";
     return `${windNameCatalan(deg)} · ${directionName(deg)}`;
   }
 
   /*
-    Flecha visual para la dirección de la ola en la píldora de mar.
-    Si la flecha se ve al revés, cambia deg por deg + 180.
+    Icono interno azul de ola.
+    No depende de archivos externos.
   */
-  function waveArrowHTML(deg) {
-    if (deg == null || Number.isNaN(deg)) return "";
-    return `<span class="wave-arrow-inline" style="transform: rotate(${deg}deg)" aria-hidden="true">↑</span>`;
+  function seaMiniIconHTML(marine) {
+    if (!marine || marine.waveHeight == null) return "";
+
+    const level = seaStateLevel(marine.waveHeight);
+
+    const className = {
+      calm: "sea-mini-calm",
+      small: "sea-mini-small",
+      moderate: "sea-mini-moderate",
+      high: "sea-mini-high",
+      "very-high": "sea-mini-very-high",
+      unknown: "sea-mini-moderate"
+    }[level];
+
+    const directionHTML = marine.waveDirection != null
+      ? `
+        <span class="sea-mini-direction">
+          <span
+            class="sea-mini-direction-arrow"
+            style="transform: rotate(${marine.waveDirection}deg)"
+            aria-hidden="true"
+          >↑</span>
+          ${waveDirectionLabel(marine.waveDirection)}
+        </span>
+      `
+      : "";
+
+    return `
+      <div class="sea-mini">
+        <span class="sea-mini-icon ${className}" aria-hidden="true">
+          <svg viewBox="0 0 24 24" focusable="false">
+            <path fill="currentColor" d="M3 14.5c1.8 0 2.7-.7 3.6-1.4.9-.7 1.8-1.4 3.6-1.4s2.7.7 3.6 1.4c.9.7 1.8 1.4 3.6 1.4s2.7-.7 3.6-1.4v2.7c-.9.6-1.9 1.1-3.6 1.1-1.8 0-2.7-.7-3.6-1.4-.9-.7-1.8-1.4-3.6-1.4s-2.7.7-3.6 1.4c-.9.7-1.8 1.4-3.6 1.4v-2.4Z"/>
+            <path fill="currentColor" opacity=".55" d="M3 9.5c1.8 0 2.7-.7 3.6-1.4.9-.7 1.8-1.4 3.6-1.4s2.7.7 3.6 1.4c.9.7 1.8 1.4 3.6 1.4s2.7-.7 3.6-1.4v2.7c-.9.6-1.9 1.1-3.6 1.1-1.8 0-2.7-.7-3.6-1.4-.9-.7-1.8-1.4-3.6-1.4s-2.7.7-3.6 1.4c-.9.7-1.8 1.4-3.6 1.4V9.5Z"/>
+          </svg>
+        </span>
+
+        <span class="sea-mini-data">
+          <span>
+            <span class="sea-mini-value">${marine.waveHeight.toFixed(1)} m</span>
+            <span class="sea-mini-label">${seaStateLabel(marine.waveHeight)}</span>
+          </span>
+          ${directionHTML}
+        </span>
+      </div>
+    `;
   }
 
   /*
-    Comentario sobre la mar.
-    Aquí hemos quitado la dirección del onatge en el comentario,
-    como pediste. La dirección sigue apareciendo en la píldora de mar.
+    COMENTARIO SOBRE LA MAR
+    La dirección de la ola NO se repite aquí.
+    Solo aparece debajo del icono de ola.
   */
   function marineComment(marine) {
     if (!marine || marine.waveHeight == null) {
@@ -322,27 +332,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
   /*
     COMENTARIO DE VIENTO
-    ------------------------------------------------------------
-    Este es el sitio principal para añadir más frases sobre el viento.
-
-    Puedes modificar:
-    - los umbrales de velocidad
-    - los textos
-    - las frases específicas según el nombre del viento
   */
   function windComment({ wind, direction }) {
     const name = windNameCatalan(direction);
 
-    /*
-      Casos específicos por dirección.
-      Estos mensajes se evalúan antes que los generales.
-    */
     if (name === "Garbí" && wind >= 18) {
-      return "Garbí moderat o viu: pot aixecar onatge i fer més exigent la tornada si anem cap a Sant Pol. Millor no allunyar-se gaire.";
+      return "Garbí moderat o viu: pot aixecar onatge i fer més exigent la tornada. Millor no allunyar-se gaire.";
     }
 
     if (name === "Llevant" && wind >= 18) {
-      return "Llevant moderat o viu: pot empitjorar l'estat de la badia. Cal prudència.";
+      return "Llevant moderat o viu: pot portar mar de cara i empitjorar l'estat de la badia. Cal prudència.";
     }
 
     if (name === "Tramuntana" && wind >= 18) {
@@ -353,9 +352,6 @@ document.addEventListener("DOMContentLoaded", () => {
       return "Mestral moderat o viu: pot ser irregular i incòmode. Millor quedar-se a prop de la costa.";
     }
 
-    /*
-      Casos generales por intensidad.
-    */
     if (wind >= 40) {
       return `Vent molt fort de ${name}: condicions molt exigents. Millor evitar zones exposades i valorar no sortir.`;
     }
@@ -381,9 +377,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   /*
     COMENTARIO DE LLUVIA
-    ------------------------------------------------------------
-    Frases separadas para lluvia.
-    Si no hay lluvia relevante, devuelve texto vacío.
   */
   function rainComment({ rain }) {
     if (rain >= 5) {
@@ -403,8 +396,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   /*
     COMENTARIO DE LUCES
-    ------------------------------------------------------------
-    Añade aviso si la salida está cerca o después de la puesta de sol.
   */
   function lightsComment(targetDate, sun) {
     if (!sun?.sunset) return "";
@@ -425,14 +416,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   /*
     RECOMENDACIÓN PRINCIPAL
-    ------------------------------------------------------------
-    Esta función decide la frase grande:
-    - Bones condicions
-    - Sortida amb precaució
-    - Quedar-se dins la badia
-    - Millor ajornar la sortida
-
-    La recomendación de ajornar es intencionadamente restrictiva.
   */
   function rowingRecommendation({ wind, rain }, marine) {
     const waveHeight = marine?.waveHeight ?? 0;
@@ -470,9 +453,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /*
-    ALERTA ESPECÍFICA DEL GRUPO
-    ------------------------------------------------------------
-    Esta frase aparece en una caja de aviso si hay condiciones relevantes.
+    ALERTA DEL GRUPO
   */
   function sessionAlert({ wind, rain }, marine) {
     const alerts = [];
@@ -487,10 +468,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /*
-    FLECHAS DE VIENTO EN EL MAPA
-    ------------------------------------------------------------
-    Solo se muestran en escritorio.
-    En móvil se desactivan por CSS y también por JS para evitar problemas.
+    FLECHAS DE VIENTO EN EL MAPA DESKTOP
   */
   function windVisualConfig(speed) {
     if (speed < 10) {
@@ -548,9 +526,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (!layer || !layerShell) return;
 
-    /*
-      Evitamos flechas en móvil/tablet.
-    */
     const isMobile = window.matchMedia("(max-width: 900px)").matches;
     if (isMobile) return;
 
@@ -572,9 +547,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /*
-    ACTUALIZACIÓN DE LA PREVISIÓN EN PANTALLA
-    ------------------------------------------------------------
-    Esta función construye todo el HTML del panel de previsión.
+    ACTUALIZAR PANEL DE PREVISIÓN
   */
   function updateSessionForecast(data) {
     cachedWeatherData = data;
@@ -591,26 +564,17 @@ document.addEventListener("DOMContentLoaded", () => {
     const status = rowingRecommendation(session, marine);
     const windText = windComment(session);
     const rainText = rainComment(session);
-    const seaComment = marineComment(marine);
+    const seaText = marineComment(marine);
     const lightText = lightsComment(targetDate, sun);
     const alertText = sessionAlert(session, marine);
-
-    /*
-      La flecha de la rosa de viento parte de una flecha vertical.
-      Sumamos 180 para representar de forma visual la dirección del viento.
-    */
     const windArrowRotation = session.direction + 180;
 
     const commentParts = [
       windText,
       rainText,
-      seaComment,
+      seaText,
       lightText
     ].filter(Boolean);
-
-    const marineDirection = marine?.waveDirection != null
-      ? ` · ${waveArrowHTML(marine.waveDirection)} ${waveDirectionLabel(marine.waveDirection)}`
-      : "";
 
     document.getElementById("sessionSummary").innerHTML = `
       <strong>${formatSessionDate(targetDate)} · ${selectedSessionTime}</strong>
@@ -625,39 +589,44 @@ document.addEventListener("DOMContentLoaded", () => {
       </span>
 
       <div class="session-meta">
+        <span class="meta-pill">🌧️ ${session.rain.toFixed(1)} mm</span>
         <span class="meta-pill">🌡️ ${Math.round(session.temp)} °C</span>
         <span class="meta-pill">Sensació ${session.apparentTemp != null ? Math.round(session.apparentTemp) + " °C" : "--"}</span>
-        <span class="meta-pill">🌧️ ${session.rain.toFixed(1)} mm</span>
-        <span class="meta-pill sea-pill">
-          🌊 ${marine && marine.waveHeight != null ? marine.waveHeight.toFixed(1) + " m" : "--"}
-          · ${marine ? seaStateLabel(marine.waveHeight) : "Mar sense dades"}
-          ${marineDirection}
-        </span>
       </div>
 
       <div class="mini-wind-card">
-        <div class="mini-compass" aria-label="Direcció del vent">
-          <span class="mini-compass-arrow-wrap" id="windArrowInline">
-            <svg class="mini-compass-arrow" viewBox="0 0 64 64" aria-hidden="true">
-              <path fill="currentColor" d="M32 4l15 38-15-8-15 8L32 4z"></path>
-              <path fill="currentColor" opacity=".35" d="M28 32h8v24h-8z"></path>
-            </svg>
-          </span>
+        <div class="wind-sea-stack">
+          <div class="mini-compass" aria-label="Direcció del vent">
+            <span class="north">N</span>
+            <span class="south">S</span>
+            <span class="mini-compass-arrow-wrap" id="windArrowInline">
+              <svg class="mini-compass-arrow" viewBox="0 0 64 64" aria-hidden="true">
+                <path fill="currentColor" d="M32 4l15 38-15-8-15 8L32 4z"></path>
+                <path fill="currentColor" opacity=".35" d="M28 32h8v24h-8z"></path>
+              </svg>
+            </span>
+          </div>
+
+          <div class="wind-mini-data">
+            <strong>${Math.round(session.wind)} km/h</strong>
+            <span>${windLabel(session.direction)}</span>
+          </div>
+
+          ${seaMiniIconHTML(marine)}
         </div>
 
         <div class="mini-wind-info">
-          <strong>${Math.round(session.wind)} km/h</strong>
-          <span>${windLabel(session.direction)}</span>
           <div class="forecast-comment">
             ${commentParts.join("<br>")}
           </div>
-          ${alertText ? `<div class="forecast-alert">${alertText}</div>` : ""}
-        </div>
-      </div>
 
-      <div class="sun-info">
-        <span>🌅 Sortida ${formatShortTime(sun?.sunrise)}</span>
-        <span>🌇 Posta ${formatShortTime(sun?.sunset)}</span>
+          ${alertText ? `<div class="forecast-alert">${alertText}</div>` : ""}
+
+          <div class="sun-info">
+            <span>🌅 Sortida ${formatShortTime(sun?.sunrise)}</span>
+            <span>🌇 Posta ${formatShortTime(sun?.sunset)}</span>
+          </div>
+        </div>
       </div>
     `;
 
@@ -671,11 +640,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /*
-    CONTROLES DE BOTONES
-    ------------------------------------------------------------
-    Sincroniza los botones duplicados:
-    - controles de escritorio bajo el mapa
-    - controles móviles dentro del panel
+    BOTONES
   */
   function syncControls() {
     document.querySelectorAll(".day-btn").forEach(btn => {
@@ -727,18 +692,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   /*
     CARGA DE DATOS
-    ------------------------------------------------------------
-    Open-Meteo:
-    - temperatura
-    - sensación térmica
-    - lluvia
-    - viento
-    - salida/puesta de sol
-
-    Open-Meteo Marine:
-    - altura de ola
-    - dirección de ola
-    - periodo de ola
   */
   async function loadWeather() {
     const weatherUrl = new URL("https://api.open-meteo.com/v1/forecast");
@@ -791,9 +744,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   /*
     TESTS BÁSICOS
-    ------------------------------------------------------------
-    No son tests formales, pero ayudan a detectar errores
-    en consola si algo se rompe.
   */
   function runSmokeTests() {
     console.assert(Boolean(document.getElementById("map")), "Falta #map");
@@ -806,7 +756,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   /*
     ARRANQUE
-    ------------------------------------------------------------
   */
   runSmokeTests();
   attachControlEvents();
@@ -814,14 +763,8 @@ document.addEventListener("DOMContentLoaded", () => {
   initMap();
   loadWeather();
 
-  /*
-    Actualiza la previsión cada 30 minutos si la página queda abierta.
-  */
   window.setInterval(loadWeather, 30 * 60 * 1000);
 
-  /*
-    Recalcula el mapa si cambia el tamaño de la ventana.
-  */
   window.addEventListener("resize", () => {
     if (map) {
       setTimeout(() => map.invalidateSize(), 150);
