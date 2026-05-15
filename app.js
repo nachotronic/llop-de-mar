@@ -1,6 +1,6 @@
 /*
   app.js · Llop de Mar
-  Versió 4.1
+  Versió 4.2
 
   Este archivo contiene:
   - mapa CARTO/Leaflet;
@@ -10,6 +10,7 @@
   - recomendación principal;
   - comentarios de viento, lluvia, mar y luces;
   - bloque visual de viento + mar;
+  - iconos de mar desde assets/meteocat/;
   - flechas de viento en el mapa solo en escritorio.
 
   Zonas fáciles de modificar:
@@ -18,6 +19,7 @@
   - Mensajes de mar: marineComment()
   - Nombres de estado de la mar: seaStateLabel()
   - Recomendación principal: rowingRecommendation()
+  - Iconos Meteocat: seaIconFile()
 */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -237,86 +239,41 @@ document.addEventListener("DOMContentLoaded", () => {
     return "Maregassa";
   }
 
-  function seaStateLevel(waveHeight) {
-    if (waveHeight == null || Number.isNaN(waveHeight)) return "unknown";
-    if (waveHeight < 0.10) return "calm";
-    if (waveHeight <= 0.20) return "small";
-    if (waveHeight < 0.50) return "moderate";
-    if (waveHeight < 1.25) return "high";
-
-    return "very-high";
-  }
-
   function waveDirectionLabel(deg) {
     if (deg == null || Number.isNaN(deg)) return "direcció sense dades";
     return `${windNameCatalan(deg)} · ${directionName(deg)}`;
   }
 
   /*
-    Flecha pequeña para la dirección de la ola.
-    Si visualmente parece al revés, cambia deg por deg + 180.
+    ICONOS DE METEOCAT
+
+    Los nombres de archivo deben coincidir exactamente con los que tienes en GitHub:
+
+    assets/meteocat/mar-en-calma.svg
+    assets/meteocat/onadeta.svg
+    assets/meteocat/marejol.svg
+    assets/meteocat/maror.svg
+    assets/meteocat/forta-maror.svg
+    assets/meteocat/maregassa.svg
   */
-  function waveArrowHTML(deg) {
-    if (deg == null || Number.isNaN(deg)) return "";
+  function seaIconFile(waveHeight) {
+    if (waveHeight == null || Number.isNaN(waveHeight)) {
+      return "assets/meteocat/marejol.svg";
+    }
 
-    return `<span class="wave-arrow-inline" style="transform: rotate(${deg}deg)" aria-hidden="true">↑</span>`;
-  }
-  function seaIconSvg(level) {
-  if (level === "calm") {
-    return `
-      <svg viewBox="0 0 24 24" focusable="false">
-        <path fill="currentColor" d="M4 15c2 0 3-.6 4-1.2 1-.6 2-1.2 4-1.2s3 .6 4 1.2c1 .6 2 1.2 4 1.2v2c-2 0-3-.6-4-1.2-1-.6-2-1.2-4-1.2s-3 .6-4 1.2c-1 .6-2 1.2-4 1.2v-2z"/>
-      </svg>
-    `;
-  }
+    if (waveHeight < 0.10) return "assets/meteocat/mar-en-calma.svg";
+    if (waveHeight <= 0.20) return "assets/meteocat/onadeta.svg";
+    if (waveHeight < 0.50) return "assets/meteocat/marejol.svg";
+    if (waveHeight < 1.25) return "assets/meteocat/maror.svg";
+    if (waveHeight < 2.50) return "assets/meteocat/forta-maror.svg";
 
-  if (level === "small") {
-    return `
-      <svg viewBox="0 0 24 24" focusable="false">
-        <path fill="currentColor" d="M3 15c1.8 0 2.7-.7 3.6-1.4.9-.7 1.8-1.4 3.6-1.4s2.7.7 3.6 1.4c.9.7 1.8 1.4 3.6 1.4s2.7-.7 3.6-1.4v2.4c-.9.7-1.8 1.4-3.6 1.4s-2.7-.7-3.6-1.4c-.9-.7-1.8-1.4-3.6-1.4s-2.7.7-3.6 1.4c-.9.7-1.8 1.4-3.6 1.4V15z"/>
-      </svg>
-    `;
+    return "assets/meteocat/maregassa.svg";
   }
-
-  if (level === "moderate") {
-    return `
-      <svg viewBox="0 0 24 24" focusable="false">
-        <path fill="currentColor" d="M3 15c1.8 0 2.7-.7 3.6-1.4.9-.7 1.8-1.4 3.6-1.4s2.7.7 3.6 1.4c.9.7 1.8 1.4 3.6 1.4s2.7-.7 3.6-1.4v2.5c-.9.6-1.9 1.1-3.6 1.1-1.8 0-2.7-.7-3.6-1.4-.9-.7-1.8-1.4-3.6-1.4s-2.7.7-3.6 1.4C5.7 19.3 4.8 20 3 20v-5z"/>
-        <path fill="currentColor" opacity=".55" d="M3 10.5c1.8 0 2.7-.7 3.6-1.4.9-.7 1.8-1.4 3.6-1.4s2.7.7 3.6 1.4c.9.7 1.8 1.4 3.6 1.4s2.7-.7 3.6-1.4v2.4c-.9.7-1.8 1.4-3.6 1.4s-2.7-.7-3.6-1.4c-.9-.7-1.8-1.4-3.6-1.4s-2.7.7-3.6 1.4C5.7 12.3 4.8 13 3 13v-2.5z"/>
-      </svg>
-    `;
-  }
-
-  if (level === "high") {
-    return `
-      <svg viewBox="0 0 24 24" focusable="false">
-        <path fill="currentColor" d="M3 16c1.6 0 2.4-.8 3.2-1.6.8-.8 1.6-1.6 3.2-1.6s2.4.8 3.2 1.6c.8.8 1.6 1.6 3.2 1.6s2.4-.8 3.2-1.6V17c-.8.7-1.7 1.3-3.2 1.3-1.6 0-2.4-.8-3.2-1.6-.8-.8-1.6-1.6-3.2-1.6s-2.4.8-3.2 1.6C5.4 17.5 4.6 18.3 3 18.3V16z"/>
-        <path fill="currentColor" opacity=".75" d="M3 11.5c1.6 0 2.4-.8 3.2-1.6.8-.8 1.6-1.6 3.2-1.6s2.4.8 3.2 1.6c.8.8 1.6 1.6 3.2 1.6s2.4-.8 3.2-1.6V13c-.8.7-1.7 1.3-3.2 1.3-1.6 0-2.4-.8-3.2-1.6-.8-.8-1.6-1.6-3.2-1.6s-2.4.8-3.2 1.6C5.4 13.5 4.6 14.3 3 14.3v-2.8z"/>
-      </svg>
-    `;
-  }
-
-  return `
-    <svg viewBox="0 0 24 24" focusable="false">
-      <path fill="currentColor" d="M2 16.5c1.5 0 2.3-.9 3.1-1.8.8-.9 1.6-1.8 3.1-1.8s2.3.9 3.1 1.8c.8.9 1.6 1.8 3.1 1.8s2.3-.9 3.1-1.8c.8-.9 1.6-1.8 3.1-1.8v2.9c-1 .8-1.9 1.4-3.1 1.4-1.5 0-2.3-.9-3.1-1.8-.8-.9-1.6-1.8-3.1-1.8s-2.3.9-3.1 1.8c-.8.9-1.6 1.8-3.1 1.8-1.2 0-2.1-.6-3.1-1.4v-3.1z"/>
-      <path fill="currentColor" opacity=".8" d="M2 11.5c1.5 0 2.3-.9 3.1-1.8.8-.9 1.6-1.8 3.1-1.8s2.3.9 3.1 1.8c.8.9 1.6 1.8 3.1 1.8s2.3-.9 3.1-1.8c.8-.9 1.6-1.8 3.1-1.8v2.9c-1 .8-1.9 1.4-3.1 1.4-1.5 0-2.3-.9-3.1-1.8-.8-.9-1.6-1.8-3.1-1.8s-2.3.9-3.1 1.8c-.8.9-1.6 1.8-3.1 1.8-1.2 0-2.1-.6-3.1-1.4v-3.1z"/>
-    </svg>
-  `;
-}
 
   function seaMiniIconHTML(marine) {
     if (!marine || marine.waveHeight == null) return "";
 
-    const level = seaStateLevel(marine.waveHeight);
-
-    const className = {
-      calm: "sea-mini-calm",
-      small: "sea-mini-small",
-      moderate: "sea-mini-moderate",
-      high: "sea-mini-high",
-      "very-high": "sea-mini-very-high",
-      unknown: "sea-mini-moderate"
-    }[level];
+    const iconSrc = seaIconFile(marine.waveHeight);
 
     const directionHTML = marine.waveDirection != null
       ? `
@@ -333,15 +290,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
     return `
       <div class="sea-mini">
-        <span class="sea-mini-icon ${className}" aria-hidden="true">
-  ${seaIconSvg(level)}
-</span>
+        <span class="sea-mini-icon" aria-hidden="true">
+          <img src="${iconSrc}" alt="" class="sea-mini-img">
+        </span>
 
         <span class="sea-mini-data">
           <span>
-  <span class="sea-mini-value">${marine.waveHeight.toFixed(1)} m</span>
-  <span class="sea-mini-label">${seaStateLabel(marine.waveHeight)}</span>
-</span>
+            <span class="sea-mini-value">${marine.waveHeight.toFixed(1)} m</span>
+            <span class="sea-mini-label">${seaStateLabel(marine.waveHeight)}</span>
+          </span>
           ${directionHTML}
         </span>
       </div>
@@ -804,6 +761,8 @@ document.addEventListener("DOMContentLoaded", () => {
     console.assert(nextSessionDate("08:00", 1) instanceof Date, "nextSessionDate debería devolver Date");
     console.assert(seaStateLabel(0.05) === "Mar en calma", "0.05 m debería ser Mar en calma");
     console.assert(seaStateLabel(0.15) === "Onadeta", "0.15 m debería ser Onadeta");
+    console.assert(seaIconFile(0.05).includes("mar-en-calma.svg"), "0.05 m debería usar mar-en-calma.svg");
+    console.assert(seaIconFile(0.15).includes("onadeta.svg"), "0.15 m debería usar onadeta.svg");
   }
 
   /*
@@ -817,6 +776,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
   window.setInterval(loadWeather, 30 * 60 * 1000);
 
+  window.addEventListener("resize", () => {
+    if (map) {
+      setTimeout(() => map.invalidateSize(), 150);
+    }
+  });
+});
   window.addEventListener("resize", () => {
     if (map) {
       setTimeout(() => map.invalidateSize(), 150);
