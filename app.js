@@ -135,8 +135,10 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function seaStateLabel(waveHeight) {
-    if (waveHeight == null || Number.isNaN(waveHeight)) return "Mar sense dades";
-    if (waveHeight < .2) return "Mar plana";
+    if (waveHeight == null || Number.isNaN(waveHeight)) return "Sense dades d'onatge";
+    if (waveHeight < .05) return "Mar plana";
+    if (waveHeight < .1) return "Petita onadeta";
+    if (waveHeight < .2) return "Onadeta";
     if (waveHeight < .5) return "Marejol";
     if (waveHeight < 1.25) return "Maror";
     if (waveHeight < 2.5) return "Forta maror";
@@ -144,7 +146,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function waveDirectionLabel(deg) {
-    if (deg == null || Number.isNaN(deg)) return "direcció sense dades";
+    if (deg == null || Number.isNaN(deg)) return "direcció de l'onada sense dades";
     return `${windNameCatalan(deg)} · ${directionName(deg)}`;
   }
 
@@ -161,9 +163,9 @@ document.addEventListener("DOMContentLoaded", () => {
       : "";
 
     if (marine.waveHeight >= 1.25) return `Onatge important: convé evitar sortir o mantenir-se en una zona molt protegida.${directionText}`;
-    if (marine.waveHeight >= .7) return `Onatge moderat: valoreu la sortida segons el nivell del grup i l'estat real de la badia.${directionText}`;
+    if (marine.waveHeight >= .7) return `Onatge moderat: valoreu la sortida segons el nivell del grup i l'estat real de la mar.${directionText}`;
     if (marine.waveHeight >= .35) return `Una mica d'onatge: sortida possible, però cal vigilar l'entrada i la sortida de l'aigua.${directionText}`;
-    return `Mar força tranquil·la segons la previsió d'onatge.${directionText}`;
+    return `Mar tranquil·la segons la previsió d'onatge.${directionText}`;
   }
 
   function lightsComment(targetDate, sun) {
@@ -172,7 +174,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const minutesToSunset = Math.round((sunsetDate - targetDate) / 60000);
 
     if (minutesToSunset <= 90 && minutesToSunset >= -30) {
-      return "Sortida propera a la posta de sol: cal portar llums i tenir-les a punt abans que baixi la llum.";
+      return "Sortida propera a la posta de sol: cal portar llums.";
     }
 
     if (minutesToSunset < -30) {
@@ -208,7 +210,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (wind >= 18) return "Vent moderat: bona idea quedar-se dins la badia o a prop de la costa i revisar l'estat real de la mar.";
     if (rain >= .8) return "Pot ploure una mica: sortida possible, però convé anar preparats.";
     if (wind <= 8 && rain < .2) return "Vent fluix i gairebé sense pluja: bones condicions per remar amb calma.";
-    return "Condicions en principi favorables, sempre revisant l'estat real de la mar abans de sortir.";
+    return "Condicions en principi favorables.";
   }
 
   function windVisualConfig(speed) {
