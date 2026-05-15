@@ -482,14 +482,27 @@ body {
 }
 
 @media (max-width: 900px) {
-  .remo-dashboard { grid-template-columns: 1fr; }
-
-  .map-frame-wrap {
-    height: 280px;
-    min-height: 260px;
+  .remo-dashboard {
+    display: flex;
+    flex-direction: column;
   }
 
-  .map-controls { display: none; }
+  .weather-card {
+    order: 1;
+  }
+
+  .map-column {
+    order: 2;
+  }
+
+  .map-frame-wrap {
+    height: 240px;
+    min-height: 220px;
+  }
+
+  .map-controls {
+    display: none;
+  }
 
   .mobile-controls {
     display: grid;
