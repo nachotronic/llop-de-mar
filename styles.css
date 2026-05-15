@@ -407,7 +407,23 @@ body {
   gap: .12rem;
   justify-items: center;
 }
+.sea-mini-value {
+  display: block;
+  font-family: Georgia, "Times New Roman", serif;
+  color: var(--ink);
+  font-size: 1.12rem;
+  line-height: 1;
+  font-weight: 900;
+}
 
+.sea-mini-label {
+  display: block;
+  margin-top: .15rem;
+  color: var(--ink-soft);
+  font-size: .76rem;
+  font-weight: 850;
+  line-height: 1.15;
+}
 .sea-mini-direction {
   display: inline-flex;
   align-items: center;
@@ -844,6 +860,13 @@ body {
     height: 240px;
     min-height: 220px;
   }
+}
+.sea-mini-value {
+  font-size: .92rem;
+}
+
+.sea-mini-label {
+  font-size: .66rem;
 }
 
 @media (max-width: 390px) {
