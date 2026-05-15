@@ -300,9 +300,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
         <span class="sea-mini-data">
           <span>
-            ${marine.waveHeight.toFixed(1)} m<br>
-            ${seaStateLabel(marine.waveHeight)}
-          </span>
+  <span class="sea-mini-value">${marine.waveHeight.toFixed(1)} m</span>
+  <span class="sea-mini-label">${seaStateLabel(marine.waveHeight)}</span>
+</span>
           ${directionHTML}
         </span>
       </div>
