@@ -1,17 +1,7 @@
 /*
   app.js · Llop de Mar
-  Versión con bloque de mar dentro del comentario
+  Versión estable con mar bajo la rosa de los vientos
   SIN iconos externos de Meteocat.
-
-  Qué incluye:
-  - mapa CARTO/Leaflet;
-  - previsión meteorológica Open-Meteo;
-  - previsión marina Open-Meteo Marine;
-  - selección de día/hora;
-  - comentarios de viento, lluvia, mar y luces;
-  - bloque visual de viento + mar;
-  - icono interno azul de ola;
-  - flechas de viento en el mapa solo en escritorio.
 */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -22,9 +12,6 @@ document.addEventListener("DOMContentLoaded", () => {
   let cachedWeatherData = null;
   let map = null;
 
-  /*
-    MAPA
-  */
   function initMap() {
     const mapElement = document.getElementById("map");
     if (!mapElement || typeof L === "undefined") return;
@@ -51,9 +38,6 @@ document.addEventListener("DOMContentLoaded", () => {
     setTimeout(() => map.invalidateSize(), 900);
   }
 
-  /*
-    DIRECCIONES
-  */
   function directionName(deg) {
     const directions = ["N", "NE", "E", "SE", "S", "SO", "O", "NO"];
     return directions[Math.round(deg / 45) % 8];
@@ -78,9 +62,6 @@ document.addEventListener("DOMContentLoaded", () => {
     return `${windNameCatalan(deg)} · ${directionName(deg)}`;
   }
 
-  /*
-    FORMATO DE FECHAS
-  */
   function capitalizeWords(text) {
     return text
       .split(" ")
@@ -119,9 +100,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  /*
-    PRÓXIMA FECHA DE SALIDA
-  */
   function parseSessionTime(timeString) {
     const [hour, minute] = timeString.split(":").map(Number);
     return { hour, minute };
@@ -144,9 +122,6 @@ document.addEventListener("DOMContentLoaded", () => {
     return now;
   }
 
-  /*
-    BUSCAR PREVISIÓN MÁS CERCANA A LA HORA DEL GRUPO
-  */
   function findClosestForecast(hourly, targetDate) {
     let closestIndex = 0;
     let closestDistance = Infinity;
@@ -206,17 +181,6 @@ document.addEventListener("DOMContentLoaded", () => {
     };
   }
 
-  /*
-    ESTADO DE LA MAR
-
-    Criterios actuales:
-    - 0 a 0,09 m: Mar en calma
-    - 0,10 a 0,20 m: Onadeta
-    - 0,21 a 0,49 m: Marejol
-    - 0,50 a 1,24 m: Maror
-    - 1,25 a 2,49 m: Forta maror
-    - 2,50 m o más: Maregassa
-  */
   function seaStateLabel(waveHeight) {
     if (waveHeight == null || Number.isNaN(waveHeight)) {
       return "Mar sense dades";
@@ -246,10 +210,6 @@ document.addEventListener("DOMContentLoaded", () => {
     return `${windNameCatalan(deg)} · ${directionName(deg)}`;
   }
 
-  /*
-    Icono interno azul de ola.
-    No depende de archivos externos.
-  */
   function seaMiniIconHTML(marine) {
     if (!marine || marine.waveHeight == null) return "";
 
@@ -297,11 +257,6 @@ document.addEventListener("DOMContentLoaded", () => {
     `;
   }
 
-  /*
-    COMENTARIO SOBRE LA MAR
-    La dirección de la ola NO se repite aquí.
-    Solo aparece debajo del icono de ola.
-  */
   function marineComment(marine) {
     if (!marine || marine.waveHeight == null) {
       return "No hi ha dades d'onatge per a aquesta hora.";
@@ -330,9 +285,6 @@ document.addEventListener("DOMContentLoaded", () => {
     return "Maregassa: condicions molt desfavorables per sortir a remar.";
   }
 
-  /*
-    COMENTARIO DE VIENTO
-  */
   function windComment({ wind, direction }) {
     const name = windNameCatalan(direction);
 
@@ -375,9 +327,6 @@ document.addEventListener("DOMContentLoaded", () => {
     return `Vent molt fluix de ${name}: condicions tranquil·les pel que fa al vent.`;
   }
 
-  /*
-    COMENTARIO DE LLUVIA
-  */
   function rainComment({ rain }) {
     if (rain >= 5) {
       return "Pluja abundant prevista: sortida incòmoda, amb possible pèrdua de visibilitat.";
@@ -394,9 +343,6 @@ document.addEventListener("DOMContentLoaded", () => {
     return "";
   }
 
-  /*
-    COMENTARIO DE LUCES
-  */
   function lightsComment(targetDate, sun) {
     if (!sun?.sunset) return "";
 
@@ -414,9 +360,6 @@ document.addEventListener("DOMContentLoaded", () => {
     return "";
   }
 
-  /*
-    RECOMENDACIÓN PRINCIPAL
-  */
   function rowingRecommendation({ wind, rain }, marine) {
     const waveHeight = marine?.waveHeight ?? 0;
 
@@ -452,9 +395,6 @@ document.addEventListener("DOMContentLoaded", () => {
     };
   }
 
-  /*
-    ALERTA DEL GRUPO
-  */
   function sessionAlert({ wind, rain }, marine) {
     const alerts = [];
 
@@ -467,9 +407,6 @@ document.addEventListener("DOMContentLoaded", () => {
       : "";
   }
 
-  /*
-    FLECHAS DE VIENTO EN EL MAPA DESKTOP
-  */
   function windVisualConfig(speed) {
     if (speed < 10) {
       return { color: "#008fa3", count: 60, opacity: 0.58, duration: 5.6 };
@@ -546,9 +483,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }, 280);
   }
 
-  /*
-    ACTUALIZAR PANEL DE PREVISIÓN
-  */
   function updateSessionForecast(data) {
     cachedWeatherData = data;
 
@@ -639,9 +573,6 @@ document.addEventListener("DOMContentLoaded", () => {
     updateWindOverlay(session.wind, session.direction);
   }
 
-  /*
-    BOTONES
-  */
   function syncControls() {
     document.querySelectorAll(".day-btn").forEach(btn => {
       btn.classList.toggle(
@@ -690,9 +621,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  /*
-    CARGA DE DATOS
-  */
   async function loadWeather() {
     const weatherUrl = new URL("https://api.open-meteo.com/v1/forecast");
 
@@ -742,9 +670,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  /*
-    TESTS BÁSICOS
-  */
   function runSmokeTests() {
     console.assert(Boolean(document.getElementById("map")), "Falta #map");
     console.assert(directionName(0) === "N", "directionName(0) debería ser N");
@@ -754,9 +679,6 @@ document.addEventListener("DOMContentLoaded", () => {
     console.assert(seaStateLabel(0.15) === "Onadeta", "0.15 m debería ser Onadeta");
   }
 
-  /*
-    ARRANQUE
-  */
   runSmokeTests();
   attachControlEvents();
   syncControls();
