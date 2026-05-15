@@ -165,7 +165,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (marine.waveHeight >= 1.25) return `Onatge important: convé evitar sortir o mantenir-se en una zona molt protegida.${directionText}`;
     if (marine.waveHeight >= .7) return `Onatge moderat: valoreu la sortida segons el nivell del grup i l'estat real de la mar.${directionText}`;
     if (marine.waveHeight >= .35) return `Una mica d'onatge: sortida possible, però cal vigilar l'entrada i la sortida de l'aigua.${directionText}`;
-    return `Mar tranquil·la segons la previsió d'onatge.${directionText}`;
+    return `Mar tranquil·la segons la previsió.${directionText}`;
   }
 
   function lightsComment(targetDate, sun) {
