@@ -642,3 +642,21 @@ body {
 
   .session-buttons { grid-template-columns: repeat(2, 1fr); }
 }
+/* FIX: colocar mar debajo de la rosa */
+.wind-sea-stack {
+  display: grid !important;
+  justify-items: center !important;
+  gap: .65rem !important;
+}
+
+.mini-wind-card {
+  display: grid !important;
+  grid-template-columns: 104px 1fr !important;
+  align-items: start !important;
+}
+
+@media (max-width: 560px) {
+  .mini-wind-card {
+    grid-template-columns: 74px 1fr !important;
+  }
+}
